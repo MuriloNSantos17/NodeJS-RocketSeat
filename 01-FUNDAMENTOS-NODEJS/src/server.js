@@ -1,7 +1,9 @@
 import http from 'node:http';
 import { json } from './middlewares/json.js';
+import { Datatbase } from './database.js';
+import { randomUUID } from 'node:crypto';
 
-const users = [];
+const database = new Datatbase();
 
 
 const server = http.createServer(async (req, res) => {
@@ -11,6 +13,7 @@ const server = http.createServer(async (req, res) => {
     await json(req, res)
 
     if (method === 'GET' && url == '/users') {
+        const users = database.select('users')
         return res.end(JSON.stringify(users))
     }
 
@@ -18,11 +21,14 @@ const server = http.createServer(async (req, res) => {
 
         const { name, email } = req.body;
 
-        users.push({
+        const user = {
             name: name,
             email: email,
-            id: 1,
-        })
+            id: randomUUID(),
+        };
+
+        database.insert('users', user)
+
         return res.writeHead(201).end()
     }
 
