@@ -1,19 +1,19 @@
-import fastify from 'fastify'
+import { transactionsRoutes } from './routes/transactions';
+import cookie from '@fastify/cookie'
 import { knex } from './database';
+import fastify from 'fastify'
 import { env } from './env';
 
 const app = fastify();
 
-app.get('/hello', async () => {
-    const transaction = await knex('transactions').
-    where('id', 'f8ee8b05-9203-4348-9b16-57137816faca').
-    select('*')
+app.register(cookie);
 
-    return transaction
-})
+app.register(transactionsRoutes, {
+    prefix: 'transactions'
+});
 
 app.listen({
-    port: env.PORT
+    port: env?.PORT
 }).then(() => {
     console.log('HTTP server is runing 🚀')
 });
