@@ -1,4 +1,4 @@
-import { createAndAuthenticateUser } from '@/utils/test/create-end-authenticate-user'
+import { createAndAuthenticateUser } from '@/utils/test/create-and-authenticate-user'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import request from 'supertest'
 import { app } from '@/app'
