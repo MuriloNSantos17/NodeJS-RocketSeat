@@ -1,12 +1,14 @@
+import { Either, left, right } from "@/core/either";
 import { QuestionsRepository } from "../respositories/questions-repository";
+import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { NotAlowedError } from "./errors/not-alowed-error";
 
 interface DeleteQuestionUseCaseRequest {
     authorId: string,
     questionId: string
 }
 
-interface DeleteQuestionUseCaseResponse {
-}
+type DeleteQuestionUseCaseResponse = Either<ResourceNotFoundError | NotAlowedError, {}>
 
 export class DeleteQuestionUseCase {
     constructor(
@@ -17,16 +19,16 @@ export class DeleteQuestionUseCase {
         const question = await this.questionRespository.findById(questionId);
 
         if (!question) {
-            throw new Error('Question not Found')
+            return left(new ResourceNotFoundError())
         }
 
         if (authorId !== question.authorId.toString()) {
-            throw new Error('User not allowed to delete this question')
+            return left(new NotAlowedError())
         }
 
         await this.questionRespository.delete(question);
 
-        return {
-        }
+        return right({
+        })
     }
 }

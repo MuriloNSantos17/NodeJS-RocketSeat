@@ -1,16 +1,18 @@
-import { InMemoryQuestionCommentCommentRepository } from 'test/repositories/in-memory-question-comment-repository';
+
 import { beforeEach, describe, expect, it, test } from 'vitest'
-import { DeleteCommentOnQuestionUseCase } from './delete-comment-on-question';
+import { DeleteCommentOnQuestionUseCase } from './delete-question-comment';
 import { makeQuestionComment } from 'test/factories/make-question-comment';
 import { UniqueEntityID } from '@/core/entites/unique-entity-id';
+import { InMemoryQuestionCommentsRepository } from 'test/repositories/in-memory-question-comment-repository';
+import { NotAlowedError } from './errors/not-alowed-error';
 
-let inMemoryQuestionCommentCommentRepository: InMemoryQuestionCommentCommentRepository
+let inMemoryQuestionCommentCommentRepository: InMemoryQuestionCommentsRepository
 let sut: DeleteCommentOnQuestionUseCase
 
 describe('Delete Question Comment', () => {
 
     beforeEach(() => {
-        inMemoryQuestionCommentCommentRepository = new InMemoryQuestionCommentCommentRepository();
+        inMemoryQuestionCommentCommentRepository = new InMemoryQuestionCommentsRepository();
         sut = new DeleteCommentOnQuestionUseCase(inMemoryQuestionCommentCommentRepository);
     })
 
@@ -34,14 +36,13 @@ describe('Delete Question Comment', () => {
 
         await inMemoryQuestionCommentCommentRepository.create(questionComment);
 
-        expect(() => {
-            return sut.execute({
-                questionCommentId: questionComment.id.toString(),
-                authorId: new UniqueEntityID('author-2').toString()
-            })
-        }).rejects.toBeInstanceOf(Error)
+        const result = await sut.execute({
+            questionCommentId: questionComment.id.toString(),
+            authorId: new UniqueEntityID('author-2').toString()
+        });
 
-
+        expect(result.isLeft()).toBe(true);
+        expect(result.value).toBeInstanceOf(NotAlowedError);
     })
 })
 

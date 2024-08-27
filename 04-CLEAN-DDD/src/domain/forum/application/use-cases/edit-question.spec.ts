@@ -3,6 +3,7 @@ import { UniqueEntityID } from '@/core/entites/unique-entity-id';
 import { makeQuestion } from 'test/factories/make-question';
 import { beforeEach, describe, expect, it } from 'vitest'
 import { EditQuestionUseCase } from './edit-question';
+import { NotAlowedError } from './errors/not-alowed-error';
 
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository
@@ -46,14 +47,17 @@ describe('Edit Question', () => {
 
         inMemoryQuestionsRepository.create(newQuestion)
 
-        expect(async () => {
-            await sut.execute({
-                content: 'teste',
-                title: 'teste',
-                questionId: 'question-1',
-                authorId: 'author-2'
-            })
-        }).rejects.toBeInstanceOf(Error);
+        const result = await sut.execute({
+            content: 'teste',
+            title: 'teste',
+            questionId: 'question-1',
+            authorId: 'author-2'
+        })
+
+        expect(result.isLeft()).toBe(true);
+        expect(result.value).toBeInstanceOf(NotAlowedError);
+
+    
     })
 })
 

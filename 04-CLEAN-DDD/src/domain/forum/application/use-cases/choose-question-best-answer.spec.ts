@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
 import { makeQuestion } from 'test/factories/make-question';
 import { ChooseQuestionBestAnswerUseCase } from './choose-question-best-answer';
+import { NotAlowedError } from './errors/not-alowed-error';
 
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository
@@ -41,22 +42,25 @@ describe('Choose Question Best Answer', () => {
     it('should not be able to choose question best answer if a diferent user id', async () => {
         const question = makeQuestion(
             {
-                authorId: new UniqueEntityID('author-id-1')
+                authorId: new UniqueEntityID('author-1')
             }
         );
+
         const answer = makeAnswer({
-            questionId: new UniqueEntityID('author-id-2')
+            questionId: question.id,
         });
 
-        await inMemoryQuestionsRepository.save(question);
-        await inMemoryAnswersRepository.save(answer);
+        await inMemoryQuestionsRepository.create(question);
+        await inMemoryAnswersRepository.create(answer);
 
-        expect(async () => {
-            await sut.execute({
-                answerId: answer.id.toString(),
-                authorId: question.authorId.toString()
-            })
-        }).rejects.toBeInstanceOf(Error);
+
+        const result = await sut.execute({
+            answerId: answer.id.toString(),
+            authorId: 'author 2'
+        });
+
+        expect(result.isLeft()).toBe(true);
+        expect(result.value).toBeInstanceOf(NotAlowedError);
 
     })
 

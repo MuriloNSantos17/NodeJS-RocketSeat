@@ -1,29 +1,36 @@
-import { QuestionCommentRepository } from "@/domain/forum/application/respositories/question-comments-repository"
-import { QuestionComent } from "@/domain/forum/enterprise/entities/question-comment"
+import { PaginationParams } from '@/core/repositories/pagination-params'
+import { QuestionComment } from '@/domain/forum/enterprise/entities/question-comment'
+export class InMemoryQuestionCommentsRepository
+    implements InMemoryQuestionCommentsRepository {
+    public items: QuestionComment[] = []
 
-export class InMemoryQuestionCommentCommentRepository implements QuestionCommentRepository {
-    public items: QuestionComent[] = []
-
-    async create(questionComment: QuestionComent) {
-        this.items.push(questionComment)
-    }
-
-    async findById(commentId: string) {
-        const questionComment = this.items.find(item => item.id.toString() === commentId);
+    async findById(id: string) {
+        const questionComment = this.items.find((item) => item.id.toString() === id)
 
         if (!questionComment) {
             return null
         }
 
-        return questionComment;
+        return questionComment
     }
 
-    async delete(questionComent: QuestionComent) {
-        const itemIndex = this.items.findIndex((item) => {
-            item.id === questionComent.id
-        })
+    async findManyByQuestionId(questionId: string, { page }: PaginationParams) {
+        const questionComments = this.items
+            .filter((item) => item.questionId.toString() === questionId)
+            .slice((page - 1) * 20, page * 20)
+
+        return questionComments
+    }
+
+    async create(questionComment: QuestionComment) {
+        this.items.push(questionComment)
+    }
+
+    async delete(questionComment: QuestionComment) {
+        const itemIndex = this.items.findIndex(
+            (item) => item.id === questionComment.id,
+        )
 
         this.items.splice(itemIndex, 1)
     }
-
 }

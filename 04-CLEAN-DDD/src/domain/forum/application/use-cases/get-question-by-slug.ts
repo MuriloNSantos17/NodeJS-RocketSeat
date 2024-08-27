@@ -1,14 +1,13 @@
-import { UniqueEntityID } from "@/core/entites/unique-entity-id";
-import { Question } from "../../enterprise/entities/question";
 import { QuestionsRepository } from "../respositories/questions-repository";
-
+import { Question } from "../../enterprise/entities/question";
+import { Either, right } from "@/core/either";
 interface GetQuestionSlugByUseCaseRequest {
     slug: string
 }
 
-interface GetQuestionSlugByUseCaseResponse {
+type GetQuestionSlugByUseCaseResponse = Either<null, {
     question: Question
-}
+}>
 
 export class GetQuestionSlugByUseCase {
     constructor(
@@ -22,8 +21,8 @@ export class GetQuestionSlugByUseCase {
             throw new Error('Question not found');
         }
 
-        return {
+        return right({
             question
-        }
+        })
     }
 }

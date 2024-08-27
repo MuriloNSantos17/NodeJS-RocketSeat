@@ -3,6 +3,7 @@ import { UniqueEntityID } from '@/core/entites/unique-entity-id';
 import { makeAnswer } from 'test/factories/make-answer';
 import { beforeEach, describe, expect, it } from 'vitest'
 import { DeleteAnswerUseCase } from './delete-answer';
+import { NotAlowedError } from './errors/not-alowed-error';
 
 
 let inMemoryAnswersRepository: InMemoryAnswersRepository
@@ -37,12 +38,13 @@ describe('Delete Answer', () => {
 
         inMemoryAnswersRepository.create(newAnswer)
 
-        expect(async () => {
-            await sut.execute({
-                answerId: 'answer-1',
-                authorId: 'author-2'
-            })
-        }).rejects.toBeInstanceOf(Error);
+        const result = await sut.execute({
+            answerId: 'answer-1',
+            authorId: 'author-2'
+        })
+
+        expect(result.isLeft()).toBe(true);
+        expect(result.value).toBeInstanceOf(NotAlowedError);
 
     })
 })
