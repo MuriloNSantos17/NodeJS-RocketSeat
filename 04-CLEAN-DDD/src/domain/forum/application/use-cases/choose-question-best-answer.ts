@@ -1,9 +1,9 @@
-import { QuestionsRepository } from "../respositories/questions-repository";
-import { AnswerRespository } from "../respositories/answers-repository";
+import { QuestionsRepository } from "../repositories/questions-repository";
 import { Question } from "../../enterprise/entities/question";
 import { Either, left, right } from "@/core/either";
-import { ResourceNotFoundError } from "./errors/resource-not-found-error";
-import { NotAlowedError } from "./errors/not-alowed-error";
+import { ResourceNotFoundError } from "../../../../core/errors/resource-not-found-error";
+import { NotAlowedError } from "../../../../core/errors/not-alowed-error";
+import { AnswersRepository } from "../repositories/answers-repository";
 
 interface ChooseQuestionBestAnswerUseCaseRequest {
     authorId: string,
@@ -16,19 +16,19 @@ type ChooseQuestionBestAnswerUseCaseResponse = Either<ResourceNotFoundError | No
 
 export class ChooseQuestionBestAnswerUseCase {
     constructor(
-        private questionsRespository: QuestionsRepository,
-        private answerRespository: AnswerRespository
+        private questionsRepository: QuestionsRepository,
+        private AnswersRepository: AnswersRepository
     ) { }
 
     async execute({ answerId, authorId }: ChooseQuestionBestAnswerUseCaseRequest): Promise<ChooseQuestionBestAnswerUseCaseResponse> {
 
-        const answer = await this.answerRespository.findById(answerId);
+        const answer = await this.AnswersRepository.findById(answerId);
 
         if (!answer) {
             return left(new ResourceNotFoundError())
         }
 
-        const question = await this.questionsRespository.findById(
+        const question = await this.questionsRepository.findById(
             answer.questionId.toValue()
         );
 
@@ -42,7 +42,7 @@ export class ChooseQuestionBestAnswerUseCase {
 
         question.bestAnswerId = answer.id;
 
-        await this.questionsRespository.save(question);
+        await this.questionsRepository.save(question);
 
         return right({
             question

@@ -1,7 +1,7 @@
-import { QuestionCommentRepository } from '../respositories/question-comments-repository'
+import { QuestionCommentRepository } from '../repositories/question-comments-repository'
 import { QuestionComment } from '../../enterprise/entities/question-comment'
 import { Either, right } from '@/core/either'
-import { ResourceNotFoundError } from './errors/resource-not-found-error'
+import { ResourceNotFoundError } from '../../../../core/errors/resource-not-found-error'
 
 interface FetchQuestionCommentsRequest {
     questionID: string,

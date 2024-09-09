@@ -4,7 +4,7 @@ import { DeleteCommentOnQuestionUseCase } from './delete-question-comment';
 import { makeQuestionComment } from 'test/factories/make-question-comment';
 import { UniqueEntityID } from '@/core/entites/unique-entity-id';
 import { InMemoryQuestionCommentsRepository } from 'test/repositories/in-memory-question-comment-repository';
-import { NotAlowedError } from './errors/not-alowed-error';
+import { NotAlowedError } from '../../../../core/errors/not-alowed-error';
 
 let inMemoryQuestionCommentCommentRepository: InMemoryQuestionCommentsRepository
 let sut: DeleteCommentOnQuestionUseCase

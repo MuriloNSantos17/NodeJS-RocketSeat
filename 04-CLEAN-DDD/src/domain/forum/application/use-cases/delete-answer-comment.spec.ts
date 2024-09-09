@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, test } from 'vitest'
 import { DeleteCommentOnAnswerUseCase } from './delete-answer-comment';
 import { makeAnswerComment } from 'test/factories/make-answer-comment';
 import { UniqueEntityID } from '@/core/entites/unique-entity-id';
-import { NotAlowedError } from './errors/not-alowed-error';
+import { NotAlowedError } from '../../../../core/errors/not-alowed-error';
 
 let inMemoryAnswerCommentCommentRepository: InMemoryAnswerCommentCommentRepository
 let sut: DeleteCommentOnAnswerUseCase

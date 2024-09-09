@@ -1,4 +1,4 @@
-import { AnswerCommentRepository } from '../respositories/answer-comments-repository'
+import { AnswerCommentRepository } from '../repositories/answer-comments-repository'
 import { AnswerComent } from '../../enterprise/entities/answer-comment'
 import { Either, right } from '@/core/either'
 
