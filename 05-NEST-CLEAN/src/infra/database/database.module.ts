@@ -6,10 +6,31 @@ import { PrismaQuestionAttachmentsRepository } from "./repositories/prisma-quest
 import { PrismaAnswersRepository } from "./repositories/prisma-answers-repository";
 import { PrismaAnswerCommentsRepository } from "./repositories/prisma-answer-comments-repository";
 import { PrismaAnswerAttachmentsRepository } from "./repositories/prisma-answer-attachments-repository";
+import { QuestionsRepository } from "@/domain/forum/application/repositories/questions-repository";
 
 @Module({
-    providers: [PrismaService, PrismaQuestionsRepository, PrismaQuestionCommentsRepository, PrismaQuestionAttachmentsRepository, PrismaAnswersRepository, PrismaAnswerCommentsRepository, PrismaAnswerAttachmentsRepository],
-    exports: [PrismaService]
+    providers: [
+        PrismaQuestionAttachmentsRepository,
+        PrismaAnswerAttachmentsRepository,
+        PrismaQuestionCommentsRepository,
+        PrismaAnswerCommentsRepository,
+        PrismaQuestionsRepository,
+        PrismaAnswersRepository,
+        PrismaService,
+        {
+            provide: QuestionsRepository,
+            useClass: PrismaQuestionsRepository
+        }
+    ],
+    exports: [PrismaService,
+        QuestionsRepository,
+        PrismaQuestionCommentsRepository,
+        PrismaQuestionAttachmentsRepository,
+        PrismaAnswersRepository,
+        PrismaAnswerCommentsRepository,
+        PrismaAnswerAttachmentsRepository
+
+    ]
 })
 
 export class DatabaseModule { }

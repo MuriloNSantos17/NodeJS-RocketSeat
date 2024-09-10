@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { JWTAuthGuard } from "@/infra/auth/jwt.auth.guard";
 import { PrismaService } from "@/infra/database/prisma/prisma.service";
 import { ZodValidationPipe } from "../pipes/zod-validation-pipe";
+import { CreateQuestionUseCase } from "@/domain/forum/application/use-cases/create-question";
 
 
 const createQuestionBodySchema = z.object({
@@ -20,7 +21,7 @@ type CreateQuestionBodySchema = z.infer<typeof createQuestionBodySchema>
 @Controller('/questions')
 @UseGuards(JWTAuthGuard)
 export class CreateQuestionController {
-    constructor(private prisma: PrismaService) {
+    constructor(private createQuestion: CreateQuestionUseCase) {
 
     }
 
@@ -33,24 +34,13 @@ export class CreateQuestionController {
         const { content, title } = body;
 
         const { sub: userId } = user
-        const slug = this.convertToSlug(title);
-
-        await this.prisma.question.create({
-            data: {
-                content,
-                title,
-                slug,
-                authorId: userId
-            }
+      
+        await this.createQuestion.execute({
+            title: title,
+            content: content,
+            authorId: userId,
+            attchmentsIds: []
         })
     }
 
-    private convertToSlug(title: string): string {
-        return title
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-    }
 }
