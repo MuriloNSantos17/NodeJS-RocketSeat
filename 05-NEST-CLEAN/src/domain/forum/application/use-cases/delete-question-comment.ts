@@ -1,33 +1,40 @@
-import { Either, left, right } from "@/core/either";
-import { QuestionCommentRepository } from "../repositories/question-comments-repository";
-import { ResourceNotFoundError } from "../../../../core/errors/resource-not-found-error";
-import { NotAlowedError } from "../../../../core/errors/not-alowed-error";
+import { Either, left, right } from '@/core/either'
+import { QuestionCommentsRepository } from '@/domain/forum/application/repositories/question-comments-repository'
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error'
+import { Injectable } from '@nestjs/common'
 
-interface DeleteCommentOnQuestionUseCaseRequest {
-    authorId: string,
-    questionCommentId: string,
+interface DeleteQuestionCommentUseCaseRequest {
+  authorId: string
+  questionCommentId: string
 }
 
-type DeleteCommentOnQuestionUseCaseResponse = Either<ResourceNotFoundError | NotAlowedError, null>
+type DeleteQuestionCommentUseCaseResponse = Either<
+  ResourceNotFoundError | NotAllowedError,
+  null
+>
 
-export class DeleteCommentOnQuestionUseCase {
-    constructor(
-        private questionCommentRepository: QuestionCommentRepository
-    ) { }
+@Injectable()
+export class DeleteQuestionCommentUseCase {
+  constructor(private questionCommentsRepository: QuestionCommentsRepository) {}
 
-    async execute({ authorId, questionCommentId, }: DeleteCommentOnQuestionUseCaseRequest): Promise<DeleteCommentOnQuestionUseCaseResponse> {
-        const questionComment = await this.questionCommentRepository.findById(questionCommentId);
+  async execute({
+    authorId,
+    questionCommentId,
+  }: DeleteQuestionCommentUseCaseRequest): Promise<DeleteQuestionCommentUseCaseResponse> {
+    const questionComment =
+      await this.questionCommentsRepository.findById(questionCommentId)
 
-        if (!questionComment) {
-            return left(new ResourceNotFoundError())
-        }
-
-        if (questionComment.authorId.toString() !== authorId) {
-            return left(new NotAlowedError())
-        }
-
-        await this.questionCommentRepository.delete(questionComment);
-
-        return right(null)
+    if (!questionComment) {
+      return left(new ResourceNotFoundError())
     }
+
+    if (questionComment.authorId.toString() !== authorId) {
+      return left(new NotAllowedError())
+    }
+
+    await this.questionCommentsRepository.delete(questionComment)
+
+    return right(null)
+  }
 }

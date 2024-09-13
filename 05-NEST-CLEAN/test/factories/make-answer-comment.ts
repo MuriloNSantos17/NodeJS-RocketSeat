@@ -1,17 +1,45 @@
-import { AnswerComent, AnswerComentProps } from "@/domain/forum/enterprise/entities/answer-comment";
-import { UniqueEntityID } from "@/core/entites/unique-entity-id";
 import { faker } from '@faker-js/faker'
 
-export function makeAnswerComment(
-    override: Partial<AnswerComentProps> = {},
-    id?: UniqueEntityID
-) {
-    const answerComment = AnswerComent.create({
-        answerId: new UniqueEntityID(),
-        authorId: new UniqueEntityID('1'),
-        content: faker.lorem.text(),
-        ...override
-    }, id)
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
-    return answerComment;
+import {
+  AnswerComment,
+  AnswerCommentProps,
+} from '@/domain/forum/enterprise/entities/answer-comment'
+import { PrismaAnswerCommentMapper } from '@/infra/database/prisma/mappers/prisma-answer-comment-mapper'
+import { PrismaService } from '@/infra/database/prisma/prisma.service'
+import { Injectable } from '@nestjs/common'
+
+export function makeAnswerComment(
+  override: Partial<AnswerCommentProps> = {},
+  id?: UniqueEntityID,
+) {
+  const answer = AnswerComment.create(
+    {
+      authorId: new UniqueEntityID(),
+      answerId: new UniqueEntityID(),
+      content: faker.lorem.text(),
+      ...override,
+    },
+    id,
+  )
+
+  return answer
+}
+
+@Injectable()
+export class AnswerCommentFactory {
+  constructor(private prisma: PrismaService) {}
+
+  async makePrismaAnswerComment(
+    data: Partial<AnswerCommentProps> = {},
+  ): Promise<AnswerComment> {
+    const answerComment = makeAnswerComment(data)
+
+    await this.prisma.comment.create({
+      data: PrismaAnswerCommentMapper.toPrisma(answerComment),
+    })
+
+    return answerComment
+  }
 }

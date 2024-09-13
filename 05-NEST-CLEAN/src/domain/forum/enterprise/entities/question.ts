@@ -1,105 +1,116 @@
-import { UniqueEntityID } from "@/core/entites/unique-entity-id";
-import { AggregateRoot } from "@/core/entites/aggregate-root";
-import { Slug } from "./value-objects/slug";
-import { Optional } from "@/core/types/optional";
-import dayjs from "dayjs";
-import { QuestionAttachment } from "./question-attachment";
-import { QuestionAttachmentList } from "./question-attachment-list";
-import { QuestionBestAnswerChosenEvent } from "../events/question-best-answer-chosen";
+import { AggregateRoot } from '@/core/entities/aggregate-root'
+import { Slug } from './value-objects/slug'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { Optional } from '@/core/types/optional'
+import dayjs from 'dayjs'
+import { QuestionAttachmentList } from './question-attachment-list'
+import { QuestionBestAnswerChosenEvent } from '@/domain/forum/enterprise/events/question-best-answer-chosen-event'
 
 export interface QuestionProps {
-    authorId: UniqueEntityID
-    bestAnswerId?: UniqueEntityID | null
-    title: string,
-    content: string,
-    slug: Slug,
-    attachments: QuestionAttachmentList
-    createdAt: Date
-    updateAt?: Date | null
+  authorId: UniqueEntityID
+  bestAnswerId?: UniqueEntityID | null
+  title: string
+  content: string
+  slug: Slug
+  attachments: QuestionAttachmentList
+  createdAt: Date
+  updatedAt?: Date | null
 }
 
 export class Question extends AggregateRoot<QuestionProps> {
-    get bestAnswerId() {
-        return this.props.bestAnswerId;
+  get authorId() {
+    return this.props.authorId
+  }
+
+  get bestAnswerId() {
+    return this.props.bestAnswerId
+  }
+
+  set bestAnswerId(bestAnswerId: UniqueEntityID | undefined | null) {
+    if (bestAnswerId === undefined || bestAnswerId === null) {
+      return
     }
 
-    get authorId() {
-        return this.props.authorId
+    if (
+      this.props.bestAnswerId === undefined ||
+      this.props.bestAnswerId === null ||
+      !bestAnswerId.equals(this.props.bestAnswerId)
+    ) {
+      this.addDomainEvent(new QuestionBestAnswerChosenEvent(this, bestAnswerId))
     }
 
-    get title() {
-        return this.props.title
-    }
+    this.props.bestAnswerId = bestAnswerId
 
-    get content() {
-        return this.props.content
-    }
+    this.touch()
+  }
 
-    get slug() {
-        return this.props.slug
-    }
+  get title() {
+    return this.props.title
+  }
 
-    get attachments() {
-        return this.props.attachments;
-    }
+  set title(title: string) {
+    this.props.title = title
+    this.props.slug = Slug.createFromText(title)
 
-    get createdAt() {
-        return this.props.createdAt
-    }
+    this.touch()
+  }
 
-    get updateAt() {
-        return this.props.updateAt
-    }
+  get content() {
+    return this.props.content
+  }
 
-    get isNew(): boolean {
-        return dayjs().diff(this.createdAt, 'days') <= 3
-    }
+  set content(content: string) {
+    this.props.content = content
+    this.touch()
+  }
 
-    get excerpt() {
-        return this.content.substring(0, 120).trimEnd().concat('...')
-    }
+  get slug() {
+    return this.props.slug
+  }
 
-    private touch() {
-        this.props.updateAt = new Date();
-    }
+  get attachments() {
+    return this.props.attachments
+  }
 
-    set title(title: string) {
-        this.props.title = title;
-        this.props.slug = Slug.createFromText(title);
-        this.touch();
-    }
+  set attachments(attachments: QuestionAttachmentList) {
+    this.props.attachments = attachments
+    this.touch()
+  }
 
-    set content(content: string) {
-        this.props.content = content;
-        this.touch();
-    }
+  get createdAt() {
+    return this.props.createdAt
+  }
 
-    set attachments(attachments: QuestionAttachmentList) {
-        this.props.attachments = attachments;
-        this.touch();
-    }
+  get updatedAt() {
+    return this.props.updatedAt
+  }
 
-    set bestAnswerId(bestAnswerId: UniqueEntityID | undefined | null) {
-        if (bestAnswerId === undefined || bestAnswerId === null) {
-            return;
-        }
+  get isNew(): boolean {
+    return dayjs().diff(this.createdAt, 'days') <= 3
+  }
 
-        if (this.props.bestAnswerId == undefined || !this.props.bestAnswerId.equals(bestAnswerId)) {
-            this.addDomainEvent(new QuestionBestAnswerChosenEvent(this, bestAnswerId))
-        }
+  get excerpt() {
+    return this.content.substring(0, 120).trimEnd().concat('...')
+  }
 
-        this.props.bestAnswerId = bestAnswerId;
+  private touch() {
+    this.props.updatedAt = new Date()
+  }
 
-        this.touch();
-    }
+  static create(
+    props: Optional<QuestionProps, 'createdAt' | 'slug' | 'attachments'>,
+    id?: UniqueEntityID,
+  ) {
+    const question = new Question(
+      {
+        ...props,
+        slug: props.slug ?? Slug.createFromText(props.title),
+        attachments: props.attachments ?? new QuestionAttachmentList(),
+        createdAt: props.createdAt ?? new Date(),
+      },
+      id,
+    )
 
-    static create(props: Optional<QuestionProps, 'createdAt' | 'slug' | 'attachments'>, id?: UniqueEntityID) {
-        const question = new Question({
-            ...props,
-            slug: props.slug ?? Slug.createFromText(props.title),
-            attachments: props.attachments ?? new QuestionAttachmentList,
-            createdAt: props.createdAt ?? new Date()
-        }, id)
-        return question;
-    }
+    return question
+  }
 }

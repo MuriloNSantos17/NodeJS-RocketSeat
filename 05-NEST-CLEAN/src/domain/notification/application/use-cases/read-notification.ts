@@ -1,39 +1,43 @@
-import { Notification } from "../../enterprise/entities/notification";
-import { Either, left, right } from "@/core/either";
-import { NotificationsRepository } from "../repositories/notifications.repository";
-import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
-import { NotAlowedError } from "@/core/errors/not-alowed-error";
+import { Either, left, right } from '@/core/either'
+import { Notification } from '../../enterprise/entities/notification'
+import { NotificationsRepository } from '../repositories/notifications-repository'
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error'
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
 
 interface ReadNotificationUseCaseRequest {
-    recepientId: string,
-    notificationId: string
+  recipientId: string
+  notificationId: string
 }
 
-type  SendNotificationUseCaseResponse = Either<ResourceNotFoundError | NotAlowedError, {
+type ReadNotificationUseCaseResponse = Either<
+  ResourceNotFoundError | NotAllowedError,
+  {
     notification: Notification
-}>
+  }
+>
 
 export class ReadNotificationUseCase {
-    constructor(
-        private notificationRepository: NotificationsRepository
-    ) { }
+  constructor(private notificationsRepository: NotificationsRepository) {}
 
-    async execute({ notificationId, recepientId }: ReadNotificationUseCaseRequest): Promise< SendNotificationUseCaseResponse> {
+  async execute({
+    recipientId,
+    notificationId,
+  }: ReadNotificationUseCaseRequest): Promise<ReadNotificationUseCaseResponse> {
+    const notification =
+      await this.notificationsRepository.findById(notificationId)
 
-        const notification = await this.notificationRepository.findById(notificationId);
-
-        if (!notification) {
-            return left(new ResourceNotFoundError())
-        }
-
-        if (recepientId !== notification.recepientId.toString()) {
-            return left(new NotAlowedError())
-        }
-
-        notification.read();
-
-        await this.notificationRepository.save(notification)
-
-        return right({ notification })
+    if (!notification) {
+      return left(new ResourceNotFoundError())
     }
+
+    if (recipientId !== notification.recipientId.toString()) {
+      return left(new NotAllowedError())
+    }
+
+    notification.read()
+
+    await this.notificationsRepository.save(notification)
+
+    return right({ notification })
+  }
 }

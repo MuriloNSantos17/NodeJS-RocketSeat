@@ -1,26 +1,33 @@
-import { QuestionCommentRepository } from '../repositories/question-comments-repository'
-import { QuestionComment } from '../../enterprise/entities/question-comment'
+import { QuestionComment } from '@/domain/forum/enterprise/entities/question-comment'
+import { QuestionCommentsRepository } from '@/domain/forum/application/repositories/question-comments-repository'
 import { Either, right } from '@/core/either'
-import { ResourceNotFoundError } from '../../../../core/errors/resource-not-found-error'
 
-interface FetchQuestionCommentsRequest {
-    questionID: string,
-    page: number
+interface FetchQuestionCommentsUseCaseRequest {
+  questionId: string
+  page: number
 }
 
-type FetchQuestionCommentsUseCaseResponse = Either<null, {
+type FetchQuestionCommentsUseCaseResponse = Either<
+  null,
+  {
     questionComments: QuestionComment[]
-}>
+  }
+>
 
 export class FetchQuestionCommentsUseCase {
-    constructor(private questionCommentRepository: QuestionCommentRepository) { }
+  constructor(private questionCommentsRepository: QuestionCommentsRepository) {}
 
-    async execute({
+  async execute({
+    questionId,
+    page,
+  }: FetchQuestionCommentsUseCaseRequest): Promise<FetchQuestionCommentsUseCaseResponse> {
+    const questionComments =
+      await this.questionCommentsRepository.findManyByQuestionId(questionId, {
         page,
-        questionID,
-    }: FetchQuestionCommentsRequest): Promise<FetchQuestionCommentsUseCaseResponse> {
-        const questionComments = await this.questionCommentRepository.findManyByQuestionId(questionID, { page })
+      })
 
-        return right({ questionComments });
-    }
+    return right({
+      questionComments,
+    })
+  }
 }

@@ -1,45 +1,52 @@
-import { AnswerCommentRepository } from "../repositories/answer-comments-repository";
-import { AnswersRepository } from "../repositories/answers-repository";
-import { AnswerComent } from "../../enterprise/entities/answer-comment";
-import { UniqueEntityID } from "@/core/entites/unique-entity-id";
-import { ResourceNotFoundError } from "../../../../core/errors/resource-not-found-error";
-import { Either, left, right, Right } from "@/core/either";
+import { AnswersRepository } from '../repositories/answers-repository'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { AnswerComment } from '@/domain/forum/enterprise/entities/answer-comment'
+import { AnswerCommentsRepository } from '@/domain/forum/application/repositories/answer-comments-repository'
+import { Either, left, right } from '@/core/either'
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error'
+import { Injectable } from '@nestjs/common'
 
-interface AnswerUseCaseRequest {
-    authorId: string,
-    answerId: string,
-    content: string
+interface CommentOnAnswerUseCaseRequest {
+  authorId: string
+  answerId: string
+  content: string
 }
 
-type AnswerUseCaseResponse = Either<ResourceNotFoundError, {
-    answerComent: AnswerComent
-}>
+type CommentOnAnswerUseCaseResponse = Either<
+  ResourceNotFoundError,
+  {
+    answerComment: AnswerComment
+  }
+>
 
+@Injectable()
 export class CommentOnAnswerUseCase {
-    constructor(
-        private AnswersRepository: AnswersRepository,
-        private answerCommentRepository: AnswerCommentRepository
-    ) { }
+  constructor(
+    private answersRepository: AnswersRepository,
+    private answerCommentsRepository: AnswerCommentsRepository,
+  ) {}
 
-    async execute({ authorId, answerId, content }: AnswerUseCaseRequest): Promise<AnswerUseCaseResponse> {
-        const answer = await this.AnswersRepository.findById(answerId);
+  async execute({
+    authorId,
+    answerId,
+    content,
+  }: CommentOnAnswerUseCaseRequest): Promise<CommentOnAnswerUseCaseResponse> {
+    const answer = await this.answersRepository.findById(answerId)
 
-        if (!answer) {
-            left(new ResourceNotFoundError())
-        }
-
-
-        const answerComent = AnswerComent.create({
-            authorId: new UniqueEntityID(authorId),
-            content: content,
-            answerId: new UniqueEntityID(answerId),
-        })
-
-        await this.answerCommentRepository.create(answerComent);
-
-
-        return right({
-            answerComent
-        })
+    if (!answer) {
+      return left(new ResourceNotFoundError())
     }
+
+    const answerComment = AnswerComment.create({
+      authorId: new UniqueEntityID(authorId),
+      answerId: new UniqueEntityID(answerId),
+      content,
+    })
+
+    await this.answerCommentsRepository.create(answerComment)
+
+    return right({
+      answerComment,
+    })
+  }
 }
