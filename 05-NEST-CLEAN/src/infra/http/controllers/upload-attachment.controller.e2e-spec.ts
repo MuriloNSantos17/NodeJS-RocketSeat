@@ -1,4 +1,3 @@
-import { Slug } from '@/domain/forum/enterprise/entities/value-objects/slug'
 import { AppModule } from '@/infra/app.module'
 import { DatabaseModule } from '@/infra/database/database.module'
 import { INestApplication } from '@nestjs/common'
@@ -8,7 +7,7 @@ import request from 'supertest'
 import { QuestionFactory } from 'test/factories/make-question'
 import { StudentFactory } from 'test/factories/make-student'
 
-describe('Upload Attachment (E2E)', () => {
+describe('Upload attachment (E2E)', () => {
   let app: INestApplication
   let studentFactory: StudentFactory
   let jwt: JwtService
@@ -32,12 +31,16 @@ describe('Upload Attachment (E2E)', () => {
 
     const accessToken = jwt.sign({ sub: user.id.toString() })
 
-
     const response = await request(app.getHttpServer())
       .post('/attachments')
       .set('Authorization', `Bearer ${accessToken}`)
       .attach('file', './test/e2e/sample-upload.png')
 
+    //console.log(response)
+
     expect(response.statusCode).toBe(201)
+    expect(response.body).toEqual({
+      attachmentId: expect.any(String),
+    })
   })
 })
