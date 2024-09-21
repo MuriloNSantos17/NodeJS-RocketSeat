@@ -2,7 +2,7 @@ import { PaginationParams } from '@/core/repositories/pagination-params'
 import { AnswerCommentsRepository } from '@/domain/forum/application/repositories/answer-comments-repository'
 import { AnswerComment } from '@/domain/forum/enterprise/entities/answer-comment'
 import { InMemoryStudentsRepository } from './in-memory-students-repository'
-import { CommentWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/comment-whit-author'
+import { CommentWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/comment-with-author'
 
 export class InMemoryAnswerCommentsRepository
   implements AnswerCommentsRepository {

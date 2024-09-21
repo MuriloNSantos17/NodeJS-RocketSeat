@@ -1,5 +1,5 @@
 import { Comment as PrismaCommnet, User as PrismaUser } from '@prisma/client'
-import { CommentWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/comment-whit-author'
+import { CommentWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/comment-with-author'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 type PrismaCommentWithAuthor = PrismaCommnet & {
